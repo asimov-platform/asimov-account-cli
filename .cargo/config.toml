@@ -1,0 +1,15 @@
+# See: https://doc.rust-lang.org/cargo/reference/config.html
+# See: https://docs.shipyard.rs/configuration/git-fetch-with-cli.html
+# See: https://stackoverflow.com/a/69447153
+
+[net]
+git-fetch-with-cli = true
+
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+[target.x86_64-pc-windows-gnu]
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+[target.x86_64-unknown-linux-gnu]
+#rustflags = ["-C", "linker=clang", "-C", "link-arg=-fuse-ld=lld"]

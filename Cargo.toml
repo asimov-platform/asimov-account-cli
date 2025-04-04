@@ -1,0 +1,48 @@
+# See: https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "asimov-account-cli"
+version = "25.0.0-dev.0"
+authors = ["ASIMOV Protocol <support@asimov.so>"]
+edition = "2021"
+rust-version = "1.81"
+description = "ASIMOV Account Command-Line Interface (CLI)"
+#documentation = ""
+readme = true
+homepage = "https://cli.asimov.so"
+repository = "https://github.com/asimov-platform/asimov-account-cli"
+license = "Unlicense"
+keywords = ["asimov", "ai", "cli"]
+categories = ["text-processing"]
+publish = true
+
+[features]
+default = ["all"]
+all = []
+unstable = ["all"]
+
+[build-dependencies]
+cfg_aliases = "0.2"
+shadow-rs = { version = "1.0", features = [
+    "build",
+    "tzdb",
+], default-features = false }
+cc = "1.1"
+
+[dev-dependencies]
+indoc = "2.0"
+temp-dir = "0.1"
+
+[dependencies]
+clap = { version = "4.5", default-features = false }
+clientele = "0.2.5"
+color-print = "=0.3.7"
+
+[[bin]]
+name = "asimov-account"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+strip = "symbols"
+#debug = true
