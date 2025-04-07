@@ -2,10 +2,10 @@
 
 #![deny(unsafe_code)]
 
-mod feature;
+mod commands;
 
 use clientele::{
-    crates::clap::{Parser, Subcommand as ClapSubcommand},
+    crates::clap::{Parser, Subcommand},
     StandardOptions,
     SysexitsError::{self, *},
 };
@@ -22,8 +22,19 @@ struct Options {
     command: Option<Command>,
 }
 
-#[derive(Debug, ClapSubcommand)]
-enum Command {}
+#[derive(Debug, Subcommand)]
+enum Command {
+    /// TBD
+    Import {},
+
+    /// TBD
+    #[clap(alias = "ls")]
+    List {},
+
+    /// TBD
+    #[cfg(feature = "unstable")]
+    Register {},
+}
 
 pub fn main() -> SysexitsError {
     // Load environment variables from `.env`:
@@ -54,5 +65,16 @@ pub fn main() -> SysexitsError {
         std::env::set_var("RUST_BACKTRACE", "1");
     }
 
-    EX_OK
+    // Execute the given command:
+    let result = match options.command.unwrap() {
+        Command::Import {} => commands::import(&options.flags),
+        Command::List {} => commands::list(&options.flags),
+        #[cfg(feature = "unstable")]
+        Command::Register {} => commands::register(&options.flags),
+    };
+
+    match result {
+        Ok(()) => EX_OK,
+        Err(err) => err,
+    }
 }
