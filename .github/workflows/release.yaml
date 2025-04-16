@@ -37,10 +37,10 @@ jobs:
           - os: macos-latest
             artifact: macos-arm
             target: aarch64-apple-darwin
-          - os: ubuntu-latest
-            artifact: windows-x64
-            target: x86_64-pc-windows-gnu
-            extension: exe
+#          - os: ubuntu-latest
+#            artifact: windows-x64
+#            target: x86_64-pc-windows-gnu
+#            extension: exe
     name: Build ${{ matrix.artifact }}
     runs-on: ${{ matrix.os }}
     continue-on-error: false
@@ -60,7 +60,7 @@ jobs:
           binary-extension: ${{ matrix.extension }}
           strip-artifact: ${{ matrix.strip || 'false' }}
           use-zigbuild: ${{ matrix.use-zigbuild || 'false' }}
-          rust-toolchain: 1.81.0
+          rust-toolchain: stable
 
   release:
     name: Release
