@@ -5,8 +5,8 @@ name: Release
 # Trigger on any tag creation:
 on:
   push:
-#    tags:
-#      - "*"
+    tags:
+      - "*"
 
 jobs:
   build:
