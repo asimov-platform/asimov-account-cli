@@ -40,6 +40,7 @@ clientele = "0.2.5"
 color-print = "=0.3.7"
 near-api = "0.5"
 tokio = { version = "1", features = ["full"] }
+crunchy = "=0.2.2"
 
 [[bin]]
 name = "asimov-account"
