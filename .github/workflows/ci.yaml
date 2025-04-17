@@ -61,9 +61,9 @@ jobs:
       - name: Install system dependencies
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          sudo apt-get update && \
+          sudo apt-get update
           sudo apt-get install --assume-yes libudev-dev pkg-config
-          export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
+          echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
       # - name: Build library
       #   id: check-lib
       #   if: ${{ always() }}
