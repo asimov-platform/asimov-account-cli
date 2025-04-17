@@ -31,12 +31,12 @@ jobs:
 #            artifact: linux-arm-musl
 #            target: aarch64-unknown-linux-musl
 #            use-zigbuild: true
-          - os: macos-latest
-            artifact: macos-x86
-            target: x86_64-apple-darwin
-          - os: macos-latest
-            artifact: macos-arm
-            target: aarch64-apple-darwin
+#          - os: macos-latest
+#            artifact: macos-x86
+#            target: x86_64-apple-darwin
+#          - os: macos-latest
+#            artifact: macos-arm
+#            target: aarch64-apple-darwin
 #          - os: ubuntu-latest
 #            artifact: windows-x64
 #            target: x86_64-pc-windows-gnu
@@ -45,11 +45,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     continue-on-error: false
     steps:
-      - name: Install system dependencies
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          sudo apt-get update && \
-          sudo apt-get install --assume-yes libudev-dev
       - name: Build
         uses: asimov-platform/build-rust-action@v2
         with:
