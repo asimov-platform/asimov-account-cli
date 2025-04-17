@@ -58,6 +58,11 @@ jobs:
           toolchain: 1.81.0
           components: rustfmt
           targets: ${{ matrix.target }}
+      - name: Install system dependencies
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install --assume-yes libudev-dev
       # - name: Build library
       #   id: check-lib
       #   if: ${{ always() }}
