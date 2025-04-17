@@ -71,7 +71,9 @@ jobs:
       - name: Build binaries
         id: check-bins
         if: ${{ always() }}
-        run: cargo +${{ steps.install-rust.outputs.name }} check --target ${{ matrix.target }} --workspace --keep-going --bins
+        run: |
+          export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
+          cargo +${{ steps.install-rust.outputs.name }} check --target ${{ matrix.target }} --workspace --keep-going --bins
       - name: Build tests
         id: check-tests
         if: ${{ steps.check-bins.outcome == 'success' }}
