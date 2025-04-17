@@ -63,6 +63,7 @@ jobs:
         run: |
           sudo apt-get update && \
           sudo apt-get install --assume-yes libudev-dev pkg-config
+          export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
       # - name: Build library
       #   id: check-lib
       #   if: ${{ always() }}
