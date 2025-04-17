@@ -62,7 +62,7 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update && \
-          sudo apt-get install --assume-yes libudev-dev
+          sudo apt-get install --assume-yes libudev-dev pkg-config
       # - name: Build library
       #   id: check-lib
       #   if: ${{ always() }}
