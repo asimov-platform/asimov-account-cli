@@ -5,8 +5,8 @@ name: Release
 # Trigger on any tag creation:
 on:
   push:
-#    tags:
-#      - "*"
+    tags:
+      - "*"
 
 jobs:
   build:
@@ -47,13 +47,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-#      - name: Install native deps on Linux
-#        if: runner.os == 'Linux'
-#        run: |
-#          sudo apt-get update
-#          sudo apt-get install -y pkg-config libudev-dev libusb-1.0-0-dev
-
       - name: Build
         uses: asimov-platform/build-rust-action@v2
         with:
