@@ -58,12 +58,6 @@ jobs:
           toolchain: 1.81.0
           components: rustfmt
           targets: ${{ matrix.target }}
-      - name: Install system dependencies
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          sudo apt-get update
-          sudo apt-get install --assume-yes libudev-dev pkg-config
-          echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
       # - name: Build library
       #   id: check-lib
       #   if: ${{ always() }}
@@ -71,9 +65,7 @@ jobs:
       - name: Build binaries
         id: check-bins
         if: ${{ always() }}
-        run: |
-          export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
-          cargo +${{ steps.install-rust.outputs.name }} check --target ${{ matrix.target }} --workspace --keep-going --bins
+        run: cargo +${{ steps.install-rust.outputs.name }} check --target ${{ matrix.target }} --workspace --keep-going --bins
       - name: Build tests
         id: check-tests
         if: ${{ steps.check-bins.outcome == 'success' }}
