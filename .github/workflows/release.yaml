@@ -14,44 +14,50 @@ jobs:
       fail-fast: true
       matrix:
         include:
+#          - os: ubuntu-latest
+#            artifact: linux-x86-gnu
+#            target: x86_64-unknown-linux-gnu
+#            glibc-version: 2.28
           - os: ubuntu-latest
             artifact: linux-arm-gnu
             target: aarch64-unknown-linux-gnu
             use-zigbuild: true
             glibc-version: 2.28
+#          - os: ubuntu-latest
+#            artifact: linux-x86-musl
+#            target: x86_64-unknown-linux-musl
+#            use-zigbuild: true
+#          - os: ubuntu-latest
+#            artifact: linux-arm-musl
+#            target: aarch64-unknown-linux-musl
+#            use-zigbuild: true
+#          - os: macos-latest
+#            artifact: macos-x86
+#            target: x86_64-apple-darwin
+#          - os: macos-latest
+#            artifact: macos-arm
+#            target: aarch64-apple-darwin
+#          - os: ubuntu-latest
+#            artifact: windows-x64
+#            target: x86_64-pc-windows-gnu
+#            extension: exe
     name: Build ${{ matrix.artifact }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: false
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Enable multiarch on the Azure mirror
-        if: runner.os == 'Linux'
-        run: |
-          sudo dpkg --add-architecture arm64
-          # switch mirror to the main Ubuntu archive (which has arm64 indexes)
-          sudo sed -i \
-            -e 's|http://azure.archive.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' \
-            -e 's|http://security.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' \
-            /etc/apt/sources.list
-
-      - name: Prepare cross‑compile dependencies
+      - name: Install native deps on Linux
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            pkg-config \
-            libudev-dev libusb-1.0-0-dev \
-            gcc-aarch64-linux-gnu \
-            pkg-config-aarch64-linux-gnu \
-            libudev-dev:arm64 \
-            libusb-1.0-0-dev:arm64
+          sudo apt-get install -y pkg-config libudev-dev libusb-1.0-0-dev
 
       - name: Build
         uses: asimov-platform/build-rust-action@v2
         env:
-          PKG_CONFIG_ALLOW_CROSS: "1"
-          PKG_CONFIG: aarch64-linux-gnu-pkg-config
+          PKG_CONFIG_SYSROOT_DIR: /
         with:
           target: ${{ matrix.target }}
           artifact-name: ${{ matrix.artifact }}
