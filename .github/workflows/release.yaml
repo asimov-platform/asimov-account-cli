@@ -21,7 +21,8 @@ jobs:
           - os: ubuntu-latest
             artifact: linux-arm-gnu
             target: aarch64-unknown-linux-gnu
-            use-zigbuild: true
+#            use-zigbuild: true
+            install-cross: true
             glibc-version: 2.28
 #          - os: ubuntu-latest
 #            artifact: linux-x86-musl
@@ -48,6 +49,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Install cross‑compile deps
+        if: matrix.install-cross == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-aarch64-linux-gnu \
+            libc6-dev:arm64 \
+            pkg-config-aarch64-linux-gnu \
+            libudev-dev:arm64 \
+            libusb-1.0-0-dev:arm64
+
       - name: Install native deps on Linux
         if: runner.os == 'Linux'
         run: |
@@ -57,7 +69,13 @@ jobs:
       - name: Build
         uses: asimov-platform/build-rust-action@v2
         env:
-          PKG_CONFIG_SYSROOT_DIR: /
+          # point cc-rs at the cross‑gcc on the PATH
+          CC_aarch64_unknown_linux_gnu: aarch64-linux-gnu-gcc
+          CXX_aarch64_unknown_linux_gnu: aarch64-linux-gnu-g++
+          # allow cross‑pkg-config
+          PKG_CONFIG_ALLOW_CROSS: "1"
+          # use the cross‑pkg-config wrapper
+          PKG_CONFIG: aarch64-linux-gnu-pkg-config
         with:
           target: ${{ matrix.target }}
           artifact-name: ${{ matrix.artifact }}
