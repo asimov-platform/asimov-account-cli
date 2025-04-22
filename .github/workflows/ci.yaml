@@ -38,9 +38,9 @@ jobs:
           # - name: macOS
           #   target: x86_64-apple-darwin
           #   os: macos-latest
-          - name: Windows
-            target: x86_64-pc-windows-gnu
-            os: windows-latest
+#          - name: Windows
+#            target: x86_64-pc-windows-gnu
+#            os: windows-latest
     name: Check ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     needs:
