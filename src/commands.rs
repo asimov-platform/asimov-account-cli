@@ -9,7 +9,5 @@ pub use import::*;
 mod list;
 pub use list::*;
 
-#[cfg(feature = "unstable")]
 mod register;
-#[cfg(feature = "unstable")]
 pub use register::*;

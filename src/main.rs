@@ -44,7 +44,6 @@ enum Command {
     List {},
 
     /// Register a new ASIMOV account.
-    #[cfg(feature = "unstable")]
     Register {
         /// The name of the account to register.
         name: AccountId,
@@ -85,7 +84,6 @@ pub fn main() -> SysexitsError {
         Command::Find { name } => commands::find(name, &options.flags),
         Command::Import { name } => commands::import(name, &options.flags),
         Command::List {} => commands::list(&options.flags),
-        #[cfg(feature = "unstable")]
         Command::Register { name } => commands::register(name, &options.flags),
     };
 
