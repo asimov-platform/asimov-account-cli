@@ -9,6 +9,7 @@ use clientele::{
     StandardOptions,
     SysexitsError::{self, *},
 };
+use near_api::AccountId;
 
 /// ASIMOV Account Command-Line Interface (CLI)
 #[derive(Debug, Parser)]
@@ -38,9 +39,12 @@ enum Command {
     #[clap(alias = "ls")]
     List {},
 
-    /// TBD
+    /// Register a new ASIMOV account.
     #[cfg(feature = "unstable")]
-    Register {},
+    Register {
+        /// The name of the account to register.
+        name: AccountId,
+    },
 }
 
 pub fn main() -> SysexitsError {
@@ -78,7 +82,7 @@ pub fn main() -> SysexitsError {
         Command::Import {} => commands::import(&options.flags),
         Command::List {} => commands::list(&options.flags),
         #[cfg(feature = "unstable")]
-        Command::Register {} => commands::register(&options.flags),
+        Command::Register { name } => commands::register(name, &options.flags),
     };
 
     match result {
