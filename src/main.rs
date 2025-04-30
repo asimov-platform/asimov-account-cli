@@ -39,7 +39,7 @@ enum Command {
         name: AccountId,
     },
 
-    /// TBD
+    /// List all known ASIMOV accounts.
     #[clap(alias = "ls")]
     List {},
 
