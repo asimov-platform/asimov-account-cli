@@ -27,6 +27,10 @@ struct Options {
 enum Command {
     /// Check whether an account exists on the network.
     Find {
+        /// The name of the account to find.
+        #[clap(value_name = "NAME")]
+        name: AccountId,
+    },
         /// The name of the account to import.
         #[clap(value_name = "NAME")]
         name: String,
@@ -78,8 +82,8 @@ pub fn main() -> SysexitsError {
 
     // Execute the given command:
     let result = match options.command.unwrap() {
-        Command::Find { name } => commands::find(&name, &options.flags),
         Command::Import {} => commands::import(&options.flags),
+        Command::Find { name } => commands::find(name, &options.flags),
         Command::List {} => commands::list(&options.flags),
         #[cfg(feature = "unstable")]
         Command::Register { name } => commands::register(name, &options.flags),
