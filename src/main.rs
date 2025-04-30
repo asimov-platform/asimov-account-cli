@@ -31,13 +31,13 @@ enum Command {
         #[clap(value_name = "NAME")]
         name: AccountId,
     },
+
+    /// Import an existing ASIMOV account.
+    Import {
         /// The name of the account to import.
         #[clap(value_name = "NAME")]
-        name: String,
+        name: AccountId,
     },
-
-    /// TBD
-    Import {},
 
     /// TBD
     #[clap(alias = "ls")]
@@ -82,8 +82,8 @@ pub fn main() -> SysexitsError {
 
     // Execute the given command:
     let result = match options.command.unwrap() {
-        Command::Import {} => commands::import(&options.flags),
         Command::Find { name } => commands::find(name, &options.flags),
+        Command::Import { name } => commands::import(name, &options.flags),
         Command::List {} => commands::list(&options.flags),
         #[cfg(feature = "unstable")]
         Command::Register { name } => commands::register(name, &options.flags),
