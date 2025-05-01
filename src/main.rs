@@ -9,7 +9,7 @@ use clientele::{
     StandardOptions,
     SysexitsError::{self, *},
 };
-use near_api::AccountId;
+use near_api::{AccountId, NearToken};
 
 /// ASIMOV Account Command-Line Interface (CLI)
 #[derive(Debug, Parser)]
@@ -48,6 +48,14 @@ enum Command {
         /// The name of the account to register.
         #[clap(value_name = "NAME")]
         name: AccountId,
+
+        /// The name of the account that sponsors the registration.
+        #[clap(long, value_name = "NAME", requires = "sponsor_amount")]
+        sponsor: Option<AccountId>,
+
+        /// The amount of NEAR tokens to sponsor the account with. For example `10 NEAR`, `0.1 NEAR`, or `10 yoctoNEAR`.
+        #[clap(long, value_name = "NEAR", requires = "sponsor")]
+        sponsor_amount: Option<NearToken>,
     },
 }
 
@@ -85,7 +93,11 @@ pub fn main() -> SysexitsError {
         Command::Find { name } => commands::find(name, &options.flags),
         Command::Import { name } => commands::import(name, &options.flags),
         Command::List {} => commands::list(&options.flags),
-        Command::Register { name } => commands::register(name, &options.flags),
+        Command::Register {
+            name,
+            sponsor,
+            sponsor_amount,
+        } => commands::register(name, sponsor, sponsor_amount, &options.flags),
     };
 
     match result {
