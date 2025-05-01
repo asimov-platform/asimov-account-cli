@@ -20,17 +20,24 @@ pub async fn register(account_id: AccountId, flags: &StandardOptions) -> Result<
         .map_err(|_| EX_SOFTWARE)?;
     let key_pair_properties_buf = serde_json::to_string(&key_pair_properties)?;
     let config = near_cli_rs::config::Config::default();
-    let network_name = match account_id.as_str().split(".").last().unwrap() {
-        "near" => "mainnet",
-        "testnet" => "testnet",
-        _ => panic!(""),
+    let network_name = match account_id.as_str().split(".").last() {
+        Some("near") => "mainnet",
+        Some("testnet") => "testnet",
+        _ => {
+            ceprintln!(
+                "<s,r>error:</> unable to determine network name from the account <s>{account_id}</>"
+            );
+            return Err(EX_USAGE);
+        }
     };
     let api_network_config = match network_name {
         "mainnet" => NetworkConfig::mainnet(),
         "testnet" => NetworkConfig::testnet(),
         _ => unreachable!(),
     };
-    let cli_network_config = config.network_connection.get(network_name).unwrap();
+    let Some(cli_network_config) = config.network_connection.get(network_name) else {
+        return Err(EX_SOFTWARE);
+    };
 
     if flags.verbose >= 2 {
         cprintln!("<s,c>»</> Sending registration request...");
@@ -45,7 +52,13 @@ pub async fn register(account_id: AccountId, flags: &StandardOptions) -> Result<
         .map_err(|_| SysexitsError::EX_TEMPFAIL)?;
 
     use near_api::near_primitives::views::{FinalExecutionOutcomeView, FinalExecutionStatus};
-    let outcome: FinalExecutionOutcomeView = result.json().await.unwrap();
+    let outcome: FinalExecutionOutcomeView = result
+        .json()
+        .await
+        .inspect_err(|error| {
+            ceprintln!("<s,r>error:</> failed to parse response: {error}");
+        })
+        .map_err(|_| EX_SOFTWARE)?;
 
     // Check for explicit failure. The returned status could also be `NotStarted` so we confirm
     // that it was created below.

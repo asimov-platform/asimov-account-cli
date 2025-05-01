@@ -46,6 +46,7 @@ enum Command {
     /// Register a new ASIMOV account.
     Register {
         /// The name of the account to register.
+        #[clap(value_name = "NAME")]
         name: AccountId,
     },
 }
