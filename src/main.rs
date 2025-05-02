@@ -2,7 +2,7 @@
 
 #![deny(unsafe_code)]
 
-mod commands;
+use asimov_account_cli::commands;
 
 use clientele::{
     crates::clap::{Parser, Subcommand},
@@ -57,6 +57,18 @@ enum Command {
         #[clap(long, value_name = "NEAR", requires = "sponsor")]
         sponsor_amount: Option<NearToken>,
     },
+
+    /// Delete a registered ASIMOV account.
+    #[clap(alias = "rm")]
+    Delete {
+        /// The name of the account to delete.
+        #[clap(value_name = "NAME")]
+        name: AccountId,
+
+        /// The beneficiary account where remaining balance will be sent.
+        #[clap(long, value_name = "NAME")]
+        beneficiary: AccountId,
+    },
 }
 
 pub fn main() -> SysexitsError {
@@ -90,6 +102,9 @@ pub fn main() -> SysexitsError {
 
     // Execute the given command:
     let result = match options.command.unwrap() {
+        Command::Delete { name, beneficiary } => {
+            commands::delete(name, beneficiary, &options.flags)
+        }
         Command::Find { name } => commands::find(name, &options.flags),
         Command::Import { name } => commands::import(name, &options.flags),
         Command::List {} => commands::list(&options.flags),

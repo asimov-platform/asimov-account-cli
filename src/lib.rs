@@ -4,4 +4,6 @@ pub mod commands;
 pub mod features;
 pub mod options {}
 
+pub mod network_name;
+
 use clientele::{StandardOptions, SysexitsError};
