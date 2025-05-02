@@ -85,7 +85,9 @@ pub async fn delete(
         }
     }
 
-    cprintln!("<s,g>✓</> Account <s>{account_id}</> has successfully been deleted");
+    if flags.verbose >= 1 {
+        cprintln!("<s,g>✓</> Account <s>{account_id}</> has successfully been deleted");
+    }
 
     Ok(())
 }
