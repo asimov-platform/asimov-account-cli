@@ -29,10 +29,10 @@ pub async fn find(account_id: AccountId, flags: &StandardOptions) -> Result<(), 
 
     let keychain = Signer::from_keystore_with_search_for_keys(account_id.clone(), &network_config)
         .await
-        .inspect_err(|error| {
-            ceprintln!("<s,r>error:</> unable to find keys for the account: {error}")
-        })
-        .map_err(|_| EX_CONFIG)?;
+        .map_err(|error| {
+            ceprintln!("<s,r>error:</> unable to find keys for the account: {error}");
+            EX_CONFIG
+        })?;
 
     if let Err(error) = keychain.get_public_key() {
         ceprintln!("<s,r>error:</> couldn't access credentials in keychain: {error}");
