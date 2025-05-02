@@ -36,14 +36,13 @@ pub fn list(flags: &StandardOptions) -> Result<(), SysexitsError> {
 
     let mut networks: BTreeMap<String, BTreeSet<AccountId>> = BTreeMap::default();
 
-    let dir = fs::read_dir(&base_path)
-        .inspect_err(|error| {
-            ceprintln!(
-                "<s,r>error:</> failed to read accounts directory: {}",
-                error
-            )
-        })
-        .map_err(|_| EX_IOERR)?;
+    let dir = fs::read_dir(&base_path).map_err(|error| {
+        ceprintln!(
+            "<s,r>error:</> failed to read accounts directory: {}",
+            error
+        );
+        EX_IOERR
+    })?;
 
     for network in dir.flatten() {
         let network_path = network.path();
@@ -54,26 +53,33 @@ pub fn list(flags: &StandardOptions) -> Result<(), SysexitsError> {
         let Some(network_name) = network_path.file_name().and_then(|name| name.to_str()) else {
             continue;
         };
-        let network_name = network_name.to_owned();
 
-        let network_dir = fs::read_dir(&network_path)
-            .inspect_err(|error| {
-                ceprintln!("<s,r>error:</> failed to read network subdir: {error}")
+        let network_dir = fs::read_dir(&network_path).map_err(|error| {
+            ceprintln!("<s,r>error:</> failed to read network subdirectory: {error}");
+            EX_IOERR
+        })?;
+
+        let accounts = network_dir
+            .flatten()
+            .filter(|file| file.file_type().is_ok_and(|ft| ft.is_file()))
+            .map(|account| {
+                account
+                    .file_name()
+                    .to_str()
+                    .ok_or(EX_CONFIG)?
+                    .parse::<AccountId>()
+                    .map_err(|_| EX_CONFIG)
             })
-            .map_err(|_| EX_IOERR)?;
+            .collect::<Result<BTreeSet<AccountId>, _>>()?;
 
-        for account in network_dir.flatten() {
-            let account_id = account
-                .file_name()
-                .to_str()
-                .ok_or(EX_CONFIG)?
-                .parse()
-                .map_err(|_| EX_CONFIG)?;
-            networks
-                .entry(network_name.clone())
-                .or_default()
-                .insert(account_id);
+        if accounts.is_empty() {
+            continue;
         }
+
+        networks
+            .entry(network_name.to_owned())
+            .or_default()
+            .extend(accounts);
     }
 
     if networks.is_empty() {
