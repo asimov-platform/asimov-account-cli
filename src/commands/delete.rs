@@ -6,7 +6,7 @@ use crate::{
     SysexitsError::{self, *},
 };
 use color_print::{ceprintln, cprintln};
-use near_api::{Account, AccountId, NetworkConfig, Signer};
+use near_api::{Account, AccountId, Signer};
 
 #[tokio::main]
 pub async fn delete(
@@ -14,17 +14,11 @@ pub async fn delete(
     beneficiary: AccountId,
     flags: &StandardOptions,
 ) -> Result<(), SysexitsError> {
-    let network_name = NetworkName::try_from(&account_id).map_err(|_|{
-
-            ceprintln!(
-                "<s,r>error:</> unable to determine network name from the account <s>{account_id}</>. The account must end with either <s>.near</> for mainnet or <s>.testnet</> for testnet accounts.",
-            );
-            EX_USAGE
+    let network_name = NetworkName::try_from(&account_id).map_err(|_| {
+        ceprintln!("<s,r>error:</> Unable to determine network name from the account");
+        EX_DATAERR
     })?;
-    let network_config = match network_name {
-        NetworkName::Testnet => NetworkConfig::testnet(),
-        NetworkName::Mainnet => NetworkConfig::mainnet(),
-    };
+    let network_config = network_name.config();
 
     if flags.verbose >= 2 {
         cprintln!("<s,c>»</> Checking for credentials in keychain...");

@@ -1,11 +1,12 @@
 // This is free and unencumbered software released into the public domain.
 
 use crate::{
+    network_name::NetworkName,
     StandardOptions,
     SysexitsError::{self, *},
 };
 use color_print::{ceprintln, cprintln};
-use near_api::{AccountId, NearToken, NetworkConfig, Signer};
+use near_api::{AccountId, NearToken, Signer};
 use near_crypto::PublicKey;
 
 #[tokio::main]
@@ -28,16 +29,14 @@ pub async fn register(
         })?;
     let key_pair_properties_buf = serde_json::to_string(&key_pair_properties)?;
     let config = near_cli_rs::config::Config::default();
-    let (network_name, api_network_config) = match account_id.as_str().split(".").last() {
-        Some("near") => (NetworkName::Mainnet, NetworkConfig::mainnet()),
-        Some("testnet") => (NetworkName::Testnet, NetworkConfig::testnet()),
-        _ => {
+    let network_name = NetworkName::try_from(&account_id).map_err(|_| {
             ceprintln!(
                 "<s,r>error:</> unable to determine network name from the account <s>{account_id}</>. The account must end with either <s>.near</> for mainnet or <s>.testnet</> for testnet accounts.",
             );
-            return Err(EX_USAGE);
-        }
-    };
+            EX_USAGE
+
+    })?;
+    let api_network_config = network_name.config();
     let Some(cli_network_config) = config.network_connection.get(network_name.as_str()) else {
         return Err(EX_SOFTWARE);
     };
@@ -52,12 +51,12 @@ pub async fn register(
             let result = near_api::Account::create_account(account_id.clone())
                 .sponsor_by_faucet_service()
                 .public_key(public_key)
-                .map_err(|_| SysexitsError::EX_SOFTWARE)?
+                .map_err(|_| EX_SOFTWARE)?
                 .send_to_config_faucet(&api_network_config)
                 .await
                 .map_err(|error| {
                     ceprintln!("<s,r>error:</> failed to create account: {error}");
-                    SysexitsError::EX_TEMPFAIL
+                    EX_TEMPFAIL
                 })?;
 
             result.json().await.map_err(|error| {
@@ -91,14 +90,14 @@ pub async fn register(
                     ceprintln!(
                         "<s,r>error:</> unexpected error while creating transaction: {error}"
                     );
-                    SysexitsError::EX_SOFTWARE
+                    EX_SOFTWARE
                 })?
                 .with_signer(signer)
                 .send_to(&api_network_config)
                 .await
                 .map_err(|error| {
                     ceprintln!("<s,r>error:</> failed to create account: {error}");
-                    SysexitsError::EX_TEMPFAIL
+                    EX_TEMPFAIL
                 })?
         }
         (_, Some(_), None) | (_, None, Some(_)) => {
@@ -188,25 +187,4 @@ pub async fn register(
     }
 
     Ok(())
-}
-
-#[derive(Debug, Clone, Copy)]
-enum NetworkName {
-    Testnet,
-    Mainnet,
-}
-
-impl NetworkName {
-    fn as_str(&self) -> &'static str {
-        match self {
-            Self::Testnet => "testnet",
-            Self::Mainnet => "mainnet",
-        }
-    }
-}
-
-impl std::fmt::Display for NetworkName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
 }

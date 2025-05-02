@@ -1,27 +1,20 @@
 // This is free and unencumbered software released into the public domain.
 
 use crate::{
+    network_name::NetworkName,
     StandardOptions,
     SysexitsError::{self, *},
 };
 use color_print::{ceprintln, cprintln};
-use near_api::{AccountId, NetworkConfig, Signer, SignerTrait as _};
+use near_api::{AccountId, Signer, SignerTrait as _};
 
 #[tokio::main]
 pub async fn find(account_id: AccountId, flags: &StandardOptions) -> Result<(), SysexitsError> {
-    let network_name = match account_id.as_str().split(".").last() {
-        Some("near") => "mainnet",
-        Some("testnet") => "testnet",
-        _ => {
-            ceprintln!("<s,r>error:</> unable to determine network name from the account");
-            return Err(EX_DATAERR);
-        }
-    };
-    let network_config = match network_name {
-        "mainnet" => NetworkConfig::mainnet(),
-        "testnet" => NetworkConfig::testnet(),
-        _ => unreachable!(),
-    };
+    let network_name = NetworkName::try_from(&account_id).map_err(|_| {
+        ceprintln!("<s,r>error:</> unable to determine network name from the account");
+        EX_DATAERR
+    })?;
+    let network_config = network_name.config();
 
     if flags.verbose >= 2 {
         cprintln!("<s,c>»</> Checking for credentials in keychain...");

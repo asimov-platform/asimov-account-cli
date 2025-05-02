@@ -1,6 +1,6 @@
 // This is free and unencumbered software released into the public domain.
 
-use near_api::AccountId;
+use near_api::{AccountId, NetworkConfig};
 
 #[derive(Debug, Clone, Copy)]
 pub enum NetworkName {
@@ -13,6 +13,13 @@ impl NetworkName {
         match self {
             Self::Testnet => "testnet",
             Self::Mainnet => "mainnet",
+        }
+    }
+
+    pub fn config(&self) -> NetworkConfig {
+        match self {
+            Self::Testnet => NetworkConfig::testnet(),
+            Self::Mainnet => NetworkConfig::mainnet(),
         }
     }
 }
