@@ -62,15 +62,8 @@ pub fn list(flags: &StandardOptions) -> Result<(), SysexitsError> {
         let accounts = network_dir
             .flatten()
             .filter(|file| file.file_type().is_ok_and(|ft| ft.is_file()))
-            .map(|account| {
-                account
-                    .file_name()
-                    .to_str()
-                    .ok_or(EX_CONFIG)?
-                    .parse::<AccountId>()
-                    .map_err(|_| EX_CONFIG)
-            })
-            .collect::<Result<BTreeSet<AccountId>, _>>()?;
+            .filter_map(|account| account.file_name().to_str()?.parse::<AccountId>().ok())
+            .collect::<BTreeSet<AccountId>>();
 
         if accounts.is_empty() {
             continue;
