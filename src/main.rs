@@ -2,13 +2,14 @@
 
 #![deny(unsafe_code)]
 
-mod commands;
+use asimov_account_cli::commands;
 
 use clientele::{
     crates::clap::{Parser, Subcommand},
     StandardOptions,
     SysexitsError::{self, *},
 };
+use near_api::{AccountId, NearToken};
 
 /// ASIMOV Account Command-Line Interface (CLI)
 #[derive(Debug, Parser)]
@@ -26,21 +27,48 @@ struct Options {
 enum Command {
     /// Check whether an account exists on the network.
     Find {
-        /// The name of the account to import.
+        /// The name of the account to find.
         #[clap(value_name = "NAME")]
-        name: String,
+        name: AccountId,
     },
 
-    /// TBD
-    Import {},
+    /// Import an existing ASIMOV account.
+    Import {
+        /// The name of the account to import.
+        #[clap(value_name = "NAME")]
+        name: AccountId,
+    },
 
-    /// TBD
+    /// List all known ASIMOV accounts.
     #[clap(alias = "ls")]
     List {},
 
-    /// TBD
-    #[cfg(feature = "unstable")]
-    Register {},
+    /// Register a new ASIMOV account.
+    Register {
+        /// The name of the account to register.
+        #[clap(value_name = "NAME")]
+        name: AccountId,
+
+        /// The name of the account that sponsors the registration.
+        #[clap(long, value_name = "NAME", requires = "sponsor_amount")]
+        sponsor: Option<AccountId>,
+
+        /// The amount of NEAR tokens to sponsor the account with. For example `10 NEAR`, `0.1 NEAR`, or `10 yoctoNEAR`.
+        #[clap(long, value_name = "NEAR", requires = "sponsor")]
+        sponsor_amount: Option<NearToken>,
+    },
+
+    /// Delete a registered ASIMOV account.
+    #[clap(alias = "rm")]
+    Delete {
+        /// The name of the account to delete.
+        #[clap(value_name = "NAME")]
+        name: AccountId,
+
+        /// The beneficiary account where remaining balance will be sent.
+        #[clap(long, value_name = "NAME")]
+        beneficiary: AccountId,
+    },
 }
 
 pub fn main() -> SysexitsError {
@@ -74,11 +102,17 @@ pub fn main() -> SysexitsError {
 
     // Execute the given command:
     let result = match options.command.unwrap() {
-        Command::Find { name } => commands::find(&name, &options.flags),
-        Command::Import {} => commands::import(&options.flags),
+        Command::Delete { name, beneficiary } => {
+            commands::delete(name, beneficiary, &options.flags)
+        }
+        Command::Find { name } => commands::find(name, &options.flags),
+        Command::Import { name } => commands::import(name, &options.flags),
         Command::List {} => commands::list(&options.flags),
-        #[cfg(feature = "unstable")]
-        Command::Register {} => commands::register(&options.flags),
+        Command::Register {
+            name,
+            sponsor,
+            sponsor_amount,
+        } => commands::register(name, sponsor, sponsor_amount, &options.flags),
     };
 
     match result {
