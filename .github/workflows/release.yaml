@@ -57,8 +57,7 @@ jobs:
           binary-extension: ${{ matrix.extension }}
           strip-artifact: ${{ matrix.strip || 'false' }}
           use-zigbuild: ${{ matrix.use-zigbuild || 'false' }}
-          rust-toolchain: 1.81.0
-
+          rust-toolchain: 1.85.0
   release:
     name: Release
     runs-on: ubuntu-latest
